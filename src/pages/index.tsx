@@ -1,118 +1,280 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { LoadingButton } from "@mui/lab";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Modal,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { GetServerSidePropsContext } from "next";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { verifyToken } from "utils/jwt";
 
-const inter = Inter({ subsets: ['latin'] })
+export default function LoginPage() {
+  const router = useRouter();
 
-export default function Home() {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const [registerUsername, setRegisterUsername] = useState<string>("");
+  const [registerPassword, setRegisterPassword] = useState<string>("");
+  const [isRegisterLoading, setIsRegisterLoading] = useState<boolean>(false);
+
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState<boolean>(false);
+  const [isSnackbarFailed, setIsSnackbarFailed] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const data = `username=${username}&password=${password}`;
+
+    fetch(`/api/auth/login`, {
+      method: "POST",
+      body: data,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        setIsSnackbarOpen(true);
+        setIsSnackbarFailed(false);
+        setSnackbarMessage("Login success! Redirecting...");
+
+        const timeout = setTimeout(() => {
+          router.push("/dashboard");
+        }, 500);
+
+        return () => clearTimeout(timeout);
+      })
+      .catch((err) => {
+        setIsSnackbarOpen(true);
+        setIsSnackbarFailed(true);
+        setSnackbarMessage(err.message || "Something went wrong!");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsRegisterLoading(true);
+
+    const data = `username=${registerUsername}&password=${registerPassword}`;
+
+    fetch(`/api/auth/register`, {
+      method: "POST",
+      body: data,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        setIsRegisterLoading(false);
+
+        setIsSnackbarOpen(true);
+        setIsSnackbarFailed(false);
+        setSnackbarMessage("Register success! You can login now.");
+
+        setIsModalOpen(false);
+
+        setRegisterUsername("");
+        setRegisterPassword("");
+      })
+      .catch((err) => {
+        setIsSnackbarOpen(true);
+        setIsSnackbarFailed(true);
+        setSnackbarMessage(err.message || "Something went wrong!");
+        setIsRegisterLoading(false);
+      });
+  };
+
+  const handleSignup = () => {
+    setIsModalOpen(true);
+  };
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
+    <Container
+      maxWidth="xs"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+      }}
     >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <Typography variant="h3" m={4}>
+        Login
+      </Typography>
+      <Box
+        display={"flex"}
+        flexDirection={"column"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        gap={2}
+        width={"100%"}
+      >
+        <form
+          id="login-form"
+          onSubmit={handleLogin}
+          className="flex flex-col gap-4 w-full"
+        >
+          <TextField
+            label="Username"
+            id="username"
+            variant="standard"
+            fullWidth
+            required
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            label="Password"
+            id="password"
+            variant="standard"
+            type="password"
+            fullWidth
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <LoadingButton
+            variant="contained"
+            loading={isLoading}
+            fullWidth
+            type="submit"
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+            Login
+          </LoadingButton>
+        </form>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Button variant="text" fullWidth onClick={handleSignup}>
+          Don&apos;t have an account? Sign up now!
+        </Button>
+        <Modal
+          id="register-modal"
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
         >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+          <Box
+            display={"flex"}
+            bgcolor={"background.paper"}
+            color={"text.primary"}
+            flexDirection={"column"}
+            alignItems={"center"}
+            justifyContent={"center"}
+            gap={2}
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "100%",
+              maxWidth: 400,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography variant="h4" m={1}>
+              Register
+            </Typography>
+            <form
+              onSubmit={handleRegister}
+              className="flex flex-col gap-4 w-full"
+            >
+              <TextField
+                label="Username"
+                id="register-username"
+                variant="standard"
+                fullWidth
+                required
+                value={registerUsername}
+                onChange={(e) => setRegisterUsername(e.target.value)}
+              />
+              <TextField
+                label="Password"
+                id="register-password"
+                variant="standard"
+                type="password"
+                fullWidth
+                required
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+              />
+              <LoadingButton
+                variant="contained"
+                loading={isRegisterLoading}
+                fullWidth
+                type="submit"
+              >
+                Register
+              </LoadingButton>
+            </form>
+          </Box>
+        </Modal>
+        <Snackbar
+          id="snackbar"
+          open={isSnackbarOpen}
+          autoHideDuration={2000}
+          onClose={() => setIsSnackbarOpen(false)}
         >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+          {isSnackbarFailed ? (
+            <Alert severity="error">{snackbarMessage}</Alert>
+          ) : (
+            <Alert severity="success">{snackbarMessage}</Alert>
+          )}
+        </Snackbar>
+      </Box>
+    </Container>
+  );
+}
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const cookies = context.req.headers.cookie;
+  if (cookies) {
+    const cookie = cookies.split(";").find((item) => {
+      return item.trim().startsWith("authtoken=");
+    });
+    const cookieValue = cookie?.split("=")[1];
+    const isCookieValid = verifyToken(cookieValue || "");
+    if (isCookieValid) {
+      return {
+        redirect: {
+          destination: "/dashboard",
+          permanent: false,
+        },
+      };
+    } else {
+      context.res.setHeader(
+        "Set-Cookie",
+        "authtoken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      );
+    }
+  }
+  return {
+    props: {},
+  };
 }

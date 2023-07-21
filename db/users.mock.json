@@ -1,0 +1,30 @@
+[
+  {
+    "id": "UPWbYCGDTafeOEAOAYDKKcBeabZXTFNB",
+    "username": "mbaharip",
+    "password": "$2b$10$4hrC4i/zTWZ0AIz9GnzEFuoSX8QFippwPcKRuz2VojxkZPf5dNg6m",
+    "createdAt": "2023-07-20T15:39:20.890Z",
+    "updatedAt": "2023-07-20T15:39:20.890Z"
+  },
+  {
+    "id": "WHWbXeAVHeNMSdcObQLfLFJQUTHUJeOG",
+    "username": "mbaharips",
+    "password": "$2b$10$LLNPCIYoR4BqzX055vO9euIEgSyZH57uXO2CW.HP7jw/bSG90KukS",
+    "createdAt": "2023-07-20T20:36:30.967Z",
+    "updatedAt": "2023-07-20T20:36:30.967Z"
+  },
+  {
+    "id": "GFHPaTJMRNXGPcRMMJABGWbOXNVbIIfP",
+    "username": "testAccount",
+    "password": "$2b$10$PjKTjRe15hXVxfk4mOdEfOCYIb1ug7p71YxG26nRir0.wILf2PEBm",
+    "createdAt": "2023-07-20T20:38:57.803Z",
+    "updatedAt": "2023-07-20T20:38:57.803Z"
+  },
+  {
+    "id": "HWaeNdICEfJZUPVUMOCSLXQMfbKMHfRE",
+    "username": "testAcc2",
+    "password": "$2b$10$8oOiGhTQu36wuLf0LdUGA.TTWf9pW0mDh5KMp6dTPgjKmGR77iBT2",
+    "createdAt": "2023-07-20T20:39:51.674Z",
+    "updatedAt": "2023-07-20T20:39:51.674Z"
+  }
+]
